@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -25,18 +23,18 @@ internal static class QueryGenerator
     }
 
     private static void GenerateQueryItems(SourceProductionContext context,
-        ImmutableArray<QueryGenerationMetadata> metadata)
+        ImmutableArray<DispatcherGenerationMetadata> metadata)
     {
         if (metadata.IsDefaultOrEmpty)
             return;
 
-        var codeToAdd = new Dictionary<string, string>();          
+        var codeToAdd = new Dictionary<string, string>();
 
         foreach (var queryGenerationMetadata in metadata)
         {
             var fullName =
                 $"{queryGenerationMetadata.Namespace}.{queryGenerationMetadata.DispatcherName}.{queryGenerationMetadata.QuerySymbol.Name}";
-            var code = GenerateDispatchingCode(queryGenerationMetadata);
+            var code = GenerateQueryDispatchingCode(queryGenerationMetadata);
             codeToAdd.Add(fullName, code);
         }
 
@@ -46,16 +44,16 @@ internal static class QueryGenerator
         }
     }
 
-    private static string GenerateDispatchingCode(QueryGenerationMetadata metadata)
+    private static string GenerateQueryDispatchingCode(DispatcherGenerationMetadata metadata)
     {
         var fullQueryName = metadata.QuerySymbol.Name;
-        var fullResponseName = metadata.ResponseSymbol.Name;
+        var fullResponseName = metadata.ResponseSymbol?.Name;
 
         var namespaceImports = new[]
         {
             metadata.QuerySymbol.ContainingNamespace.ToDisplayString(),
-            metadata.ResponseSymbol.ContainingNamespace.ToDisplayString()
-        }.Where(_ => _ != metadata.Namespace).Distinct();
+            metadata.ResponseSymbol?.ContainingNamespace.ToDisplayString()
+        }.Where(item => !string.IsNullOrWhiteSpace(item) && item != metadata.Namespace).Distinct();
 
         var sb = new IndentedStringBuilder();
         sb.AppendLine("using DotnetDispatcher.Core;");
@@ -75,18 +73,49 @@ internal static class QueryGenerator
         sb.AppendLine($"public partial interface I{metadata.DispatcherName}");
         sb.AppendLine("{");
         sb.Indent();
-        sb.AppendLine(
-            $"Task<{fullResponseName}> Dispatch({fullQueryName} query, CancellationToken cancellationToken = default);");
+        switch (metadata.CqrsType)
+        {
+            case CqrsType.Query:
+                sb.AppendLine(
+                    $"Task<{fullResponseName}> Dispatch({fullQueryName} unit, CancellationToken cancellationToken = default);");
+                break;
+            case CqrsType.Command when !string.IsNullOrEmpty(fullResponseName):
+                sb.AppendLine(
+                    $"Task<{fullResponseName}> Dispatch({fullQueryName} unit, CancellationToken cancellationToken = default);");
+                break;
+            case CqrsType.Command:
+                sb.AppendLine(
+                    $"Task Dispatch({fullQueryName} unit, CancellationToken cancellationToken = default);");
+                break;
+        }
         sb.Unindent();
         sb.AppendLine("}");
 
         sb.AppendLine($"public partial class {metadata.DispatcherName} : I{metadata.DispatcherName}");
         sb.AppendLine("{");
         sb.Indent();
-        sb.AppendLine(
-            $"public Task<{fullResponseName}> Dispatch({fullQueryName} query, CancellationToken cancellationToken = default) =>");
-        sb.Indent();
-        sb.AppendLine($"Get<IQueryHandler<{fullQueryName}, {fullResponseName}>>().Query(query, cancellationToken);");
+
+        switch (metadata.CqrsType)
+        {
+            case CqrsType.Query:
+                sb.AppendLine(
+                    $"public Task<{fullResponseName}> Dispatch({fullQueryName} unit, CancellationToken cancellationToken = default) =>");
+                sb.Indent();
+                sb.AppendLine($"Get<IQueryHandler<{fullQueryName}, {fullResponseName}>>().Query(unit, cancellationToken);");
+                break;
+            case CqrsType.Command when !string.IsNullOrEmpty(fullResponseName):
+                sb.AppendLine(
+                    $"public Task<{fullResponseName}> Dispatch({fullQueryName} unit, CancellationToken cancellationToken = default) =>");
+                sb.Indent();
+                sb.AppendLine($"Get<ICommandHandler<{fullQueryName}, {fullResponseName}>>().Execute(unit, cancellationToken);");
+                break;
+            case CqrsType.Command:
+                sb.AppendLine(
+                    $"public Task Dispatch({fullQueryName} unit, CancellationToken cancellationToken = default) =>");
+                sb.Indent();
+                sb.AppendLine($"Get<ICommandHandler<{fullQueryName}>>().Execute(unit, cancellationToken);");
+                break;
+        }
         sb.Unindent();
         sb.Unindent();
         sb.AppendLine("}");
@@ -97,7 +126,7 @@ internal static class QueryGenerator
         return sb.ToString();
     }
 
-    private static QueryGenerationMetadata? GetQueryDefinitionOrNull(GeneratorSyntaxContext context,
+    private static DispatcherGenerationMetadata? GetQueryDefinitionOrNull(GeneratorSyntaxContext context,
         CancellationToken token)
     {
         var attributeSyntax = (AttributeSyntax) context.Node;
@@ -122,7 +151,7 @@ internal static class QueryGenerator
             return null;
 
 
-        INamedTypeSymbol? handlerType = null;
+        /*INamedTypeSymbol? handlerType = null;
         if (attributeArguments?.Count == 2)
         {
             handlerType = attributeArguments?.Skip(1).FirstOrDefault()?.Expression switch
@@ -131,40 +160,30 @@ internal static class QueryGenerator
                     context.SemanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type as INamedTypeSymbol,
                 _ => null
             };
-        }
+        }*/
 
-        var queryInterface = queryType.AllInterfaces.FirstOrDefault(_ =>
-            _.Name == "IQuery" && _.TypeArguments.Length == 1);
+        var cqrsInterface = queryType.AllInterfaces.FirstOrDefault(_ =>
+            (_.Name == "IQuery" && _.TypeArguments.Length == 1) ||
+            (_.Name == "ICommand" && _.TypeArguments.Length < 2));
 
-        if (queryInterface is null)
+        if (cqrsInterface is null)
             return null;
 
-        var queryResponse = queryInterface.TypeArguments[0] as INamedTypeSymbol;
-        if (queryResponse is null)
-            return null;
-
-        return new QueryGenerationMetadata(typeSymbol.ContainingNamespace.ToDisplayString(), typeSymbol.Name, queryType,
-            queryResponse, handlerType);
-    }
-}
-
-internal static class Helpers
-{
-    internal static string? ExtractName(NameSyntax? name) =>
-        name switch
+        /*var cqrsResponse = cqrsInterface switch
         {
-            SimpleNameSyntax ins => ins.Identifier.Text,
-            QualifiedNameSyntax qns => qns.Right.Identifier.Text,
+            var _ when cqrsInterface.Name == "IQuery" => cqrsInterface.TypeArguments[0] as INamedTypeSymbol,
+            var _ when cqrsInterface is {Name: "ICommand", TypeArguments.Length: 1} =>
+                cqrsInterface.TypeArguments[0] as INamedTypeSymbol,
+            var _ when cqrsInterface is {Name: "ICommand", TypeArguments.Length: 0} => null as INamedTypeSymbol,
             _ => null
-        };
+        };*/
 
-    internal static bool IsNamedAttribute(SyntaxNode syntaxNode,
-        CancellationToken _, params string[] attributes)
-    {
-        if (syntaxNode is not AttributeSyntax attribute)
-            return false;
+        INamedTypeSymbol? queryResponse = null;
+        if (cqrsInterface.TypeArguments.Length == 1)
+            queryResponse = cqrsInterface.TypeArguments[0] as INamedTypeSymbol;
 
-        var name = Helpers.ExtractName(attribute.Name);
-        return name is not null && attributes.Contains(name);
+        return new DispatcherGenerationMetadata(typeSymbol.ContainingNamespace.ToDisplayString(), typeSymbol.Name,
+            queryType,
+            queryResponse, cqrsInterface.Name == "IQuery" ? CqrsType.Query : CqrsType.Command);
     }
 }

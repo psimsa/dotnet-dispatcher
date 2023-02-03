@@ -2,4 +2,4 @@
 
 namespace ConsoleTester.cqrs;
 
-public record MyQuery1(int Id) : IQuery<MyQuery1Response>;
+public record MyCommand1(int Id) : ICommand<MyCommand1Response>;

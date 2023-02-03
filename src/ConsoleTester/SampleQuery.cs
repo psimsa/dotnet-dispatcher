@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ConsoleTester.cqrs;
+﻿using ConsoleTester.cqrs;
 using DotnetDispatcher.Attributes;
 using DotnetDispatcher.Core;
 
@@ -23,6 +18,8 @@ public partial class MyFirstDispatcher : DispatcherBase
 
 [GenerateDispatcher(typeof(MyQuery1), typeof(MyQuery1Handler))]
 [GenerateDispatcher(typeof(MyQuery2))]
+[GenerateDispatcher(typeof(MyCommand1))]
+[GenerateDispatcher(typeof(MyCommand2))]
 public partial class MySecondDispatcher : DispatcherBase
 {
     public MySecondDispatcher(IServiceProvider serviceProvider) : base(serviceProvider)
