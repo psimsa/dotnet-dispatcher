@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Analyzer": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\ConsoleTester\\ConsoleTester.csproj"
+    }
+  }
+}

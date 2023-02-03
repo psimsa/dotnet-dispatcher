@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotnetDispatcher.Generator"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTester", "src\ConsoleTester\ConsoleTester.csproj", "{01B4AE34-B8AC-420D-A451-953E039B5BDF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotnetDispatcher.Core", "src\DotnetDispatcher.Core\DotnetDispatcher.Core.csproj", "{D5233C43-C155-476C-92FD-436842364008}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,10 +34,15 @@ Global
 		{01B4AE34-B8AC-420D-A451-953E039B5BDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01B4AE34-B8AC-420D-A451-953E039B5BDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01B4AE34-B8AC-420D-A451-953E039B5BDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5233C43-C155-476C-92FD-436842364008}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5233C43-C155-476C-92FD-436842364008}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5233C43-C155-476C-92FD-436842364008}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5233C43-C155-476C-92FD-436842364008}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D729374E-250F-4472-AF37-3579002969EC} = {9955EE7F-B7DF-4AF7-99E1-E17572BFB61D}
 		{623EB4EA-907F-4650-AB13-5F9BE39B6A8C} = {9955EE7F-B7DF-4AF7-99E1-E17572BFB61D}
 		{01B4AE34-B8AC-420D-A451-953E039B5BDF} = {9955EE7F-B7DF-4AF7-99E1-E17572BFB61D}
+		{D5233C43-C155-476C-92FD-436842364008} = {9955EE7F-B7DF-4AF7-99E1-E17572BFB61D}
 	EndGlobalSection
 EndGlobal
