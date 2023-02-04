@@ -9,6 +9,7 @@ public record SampleQuery : IQuery<SampleQueryResponse>;
 public record SampleQueryResponse(string Value);
 
 [GenerateDispatcher(typeof(SampleQuery))]
+[GenerateDispatcher(typeof(SampleQueryWithGenerics))]
 public partial class MyFirstDispatcher : DispatcherBase
 {
     public MyFirstDispatcher(IServiceProvider serviceProvider) : base(serviceProvider)

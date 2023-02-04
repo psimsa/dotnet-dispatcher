@@ -46,8 +46,8 @@ internal static class QueryGenerator
 
     private static string GenerateQueryDispatchingCode(DispatcherGenerationMetadata metadata)
     {
-        var fullQueryName = metadata.QuerySymbol.Name;
-        var fullResponseName = metadata.ResponseSymbol?.Name;
+        var fullQueryName = metadata.QuerySymbol.ToDisplayString();
+        var fullResponseName = metadata.ResponseSymbol?.ToDisplayString();
 
         var namespaceImports = new[]
         {
@@ -61,7 +61,7 @@ internal static class QueryGenerator
         sb.AppendLine("using System.Threading.Tasks;");
         foreach (var namespaceImport in namespaceImports)
         {
-            sb.AppendLine($"using {namespaceImport};");
+           // sb.AppendLine($"using {namespaceImport};");
         }
 
         sb.AppendLine();
