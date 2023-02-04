@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "main", "release" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -28,9 +28,9 @@ jobs:
     - name: Pack
       run: dotnet pack -p:Version=0.1.0.${{github.run_number}} -o out/pack
     - name: Push
-      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/release' }}
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       run: dotnet nuget push out/pack/*.nupkg -k ${{secrets.NUGET_API_KEY}} -s https://api.nuget.org/v3/index.json
     - name: Upload Packages
       uses: actions/upload-artifact@v3.1.1
       with:
-        path: out/pack/*.nupkg
+        path: out/pack/DotnetDispatcher.*.nupkg
