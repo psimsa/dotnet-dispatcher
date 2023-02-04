@@ -33,4 +33,4 @@ jobs:
     - name: Upload Packages
       uses: actions/upload-artifact@v3.1.1
       with:
-        path: out/pack/*.nupkg
+        path: out/pack/DotnetDispatcher.nupkg
