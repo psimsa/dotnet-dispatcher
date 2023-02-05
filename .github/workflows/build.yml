@@ -31,6 +31,6 @@ jobs:
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       run: dotnet nuget push out/pack/DotnetDispatcher.*.nupkg -k ${{secrets.NUGET_API_KEY}} -s https://api.nuget.org/v3/index.json
     - name: Upload Packages
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v3.1.2
       with:
         path: out/pack/DotnetDispatcher.*.nupkg
