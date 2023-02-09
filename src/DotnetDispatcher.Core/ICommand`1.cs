@@ -1,5 +1,6 @@
-﻿namespace DotnetDispatcher.Core;
-
-public interface ICommand<out TResponse>
+﻿namespace DotnetDispatcher.Core
 {
+    public interface ICommand<out TResponse>
+    {
+    }
 }

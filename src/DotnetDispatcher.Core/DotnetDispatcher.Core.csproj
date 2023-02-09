@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
-    <Nullable>warnings</Nullable>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0</TargetFrameworks>
+    <Nullable Condition=" '$(TargetFramework)' != 'netstandard2.0'">warnings</Nullable>
 	  <PackageId>$(AssemblyName)</PackageId>
 	  <Authors>ofcoursedude</Authors>
 	  <Description>CQRS classes for DotnetDispatcher</Description>
