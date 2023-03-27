@@ -4,11 +4,11 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0</TargetFrameworks>
     <Nullable Condition=" '$(TargetFramework)' != 'netstandard2.0'">warnings</Nullable>
 	  <PackageId>$(AssemblyName)</PackageId>
-	  <Authors>ofcoursedude</Authors>
+	  <Authors>Pavel Simsa</Authors>
 	  <Description>CQRS classes for DotnetDispatcher</Description>
 	  <Copyright>MIT</Copyright>
-	  <PackageProjectUrl>https://github.com/ofcoursedude/dotnet-dispatcher</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/ofcoursedude/dotnet-dispatcher</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/psimsa/dotnet-dispatcher</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/psimsa/dotnet-dispatcher</RepositoryUrl>
 	  <Product>$(AssemblyName)</Product>
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
