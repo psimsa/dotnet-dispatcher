@@ -6,11 +6,11 @@
 		<Nullable>enable</Nullable>
 		<IsRoslynComponent>true</IsRoslynComponent>
 		<PackageId>$(AssemblyName)</PackageId>
-		<Authors>ofcoursedude</Authors>
+		<Authors>Pavel Simsa</Authors>
 		<Description>Code generator for DotnetDispatcher</Description>
 		<Copyright>MIT</Copyright>
-		<PackageProjectUrl>https://github.com/ofcoursedude/dotnet-dispatcher</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/ofcoursedude/dotnet-dispatcher</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/psimsa/dotnet-dispatcher</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/psimsa/dotnet-dispatcher</RepositoryUrl>
 		<Product>$(AssemblyName)</Product>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
