@@ -34,10 +34,11 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Clean Compile Pack Publish PublishToGitHubNuget'
-        run: ./build.cmd Clean Compile Pack Publish PublishToGitHubNuget
+      - name: Run './build.cmd Clean Compile Pack PublishToGitHubNuget Publish'
+        run: ./build.cmd Clean Compile Pack PublishToGitHubNuget Publish
         env:
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v3
         with:
           name: artifacts

@@ -29,8 +29,9 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     GitHubActionsImage.UbuntuLatest,
     //On = new[] { GitHubActionsTrigger.Push },
     OnPushBranches = new[] { "main" },
-    InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Pack), nameof(Publish), nameof(PublishToGitHubNuget) },
-    ImportSecrets = new[] { nameof(NuGetApiKey) })]
+    InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish) },
+    ImportSecrets = new[] { nameof(NuGetApiKey) },
+    EnableGitHubToken = true)]
 class Build : NukeBuild
 {
     /// Support plugins are available for:
