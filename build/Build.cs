@@ -129,7 +129,6 @@ class Build : NukeBuild
     Target PublishToGitHubNuget => _ => _
         .DependsOn(Pack)
         .Consumes(Pack)
-        .Requires(() => GitHubActions.Token)
         .Executes(() =>
         {
             DotNetNuGetPush(_ => _
