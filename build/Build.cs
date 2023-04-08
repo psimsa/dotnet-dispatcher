@@ -19,15 +19,14 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 [GitHubActions(
     "Continuous build",
     GitHubActionsImage.UbuntuLatest,
-    On = new[] { GitHubActionsTrigger.Push },
-    InvokedTargets = new[] {nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack), nameof(PublishToGitHubNuget) },
+    OnPushBranchesIgnore = new[] { "main" },
+    InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack), nameof(PublishToGitHubNuget) },
     EnableGitHubToken = true
     )]
 
 [GitHubActions(
     "Build main and publish to nuget",
     GitHubActionsImage.UbuntuLatest,
-    //On = new[] { GitHubActionsTrigger.Push },
     OnPushBranches = new[] { "main" },
     InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish) },
     ImportSecrets = new[] { nameof(NuGetApiKey) },
@@ -98,7 +97,7 @@ class Build : NukeBuild
         {
             var versionSuffix = GitHubActions?.RunNumber != null ? $"{GitHubActions.RunNumber}" : "0";
 
-            if(!Repository.IsOnMainOrMasterBranch())
+            if (!Repository.IsOnMainOrMasterBranch())
                 versionSuffix += "-preview";
 
             DotNetPack(_ => _
