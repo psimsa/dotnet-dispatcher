@@ -45,12 +45,9 @@ class Build : NukeBuild
     [Parameter][Secret] readonly string NuGetApiKey;
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
-    [GitVersion(NoFetch = true)] readonly GitVersion GitVersion;
     GitHubActions GitHubActions => GitHubActions.Instance;
 
-
-    [GitRepository] readonly GitRepository Repository;
-
+    // [GitRepository] readonly GitRepository Repository;
 
     readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
 
@@ -96,13 +93,14 @@ class Build : NukeBuild
         .Produces(ArtifactsDirectory / "*.nupkg")
         .Executes(() =>
         {
+            var versionSuffix = GitHubActions?.RunId != null ? $"{GitHubActions.RunId}" : "0-dev";
             DotNetPack(_ => _
                 // .SetProject(Solution)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetNoBuild(true)
                 .SetNoRestore(true)
-                .SetVersion(GitVersion?.NuGetVersionV2 ?? "1.0.0")
+                .SetVersion($"0.2.{versionSuffix}")
                 .SetVerbosity(DotNetVerbosity.Normal)
                 .CombineWith(Solution.AllProjects.Where(_ => _.Name.Contains("DotnetDispatcher")),
                     (settings, project) => settings.SetProject(project))
