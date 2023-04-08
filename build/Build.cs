@@ -17,18 +17,18 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
-    "continuous",
+    "Continuous build",
     GitHubActionsImage.UbuntuLatest,
     On = new[] { GitHubActionsTrigger.Push },
-    InvokedTargets = new[] { nameof(Compile), nameof(Test), nameof(Pack) }
+    InvokedTargets = new[] {nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack) }
     )]
 
 [GitHubActions(
-    "main",
+    "Build main and publish to nuget",
     GitHubActionsImage.UbuntuLatest,
     //On = new[] { GitHubActionsTrigger.Push },
     OnPushBranches = new[] { "main" },
-    InvokedTargets = new[] { nameof(Compile), nameof(Pack), nameof(Publish) },
+    InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Pack), nameof(Publish) },
     ImportSecrets = new[] { nameof(NuGetApiKey) })]
 class Build : NukeBuild
 {
@@ -47,7 +47,7 @@ class Build : NukeBuild
     [Solution(GenerateProjects = true)] readonly Solution Solution;
     GitHubActions GitHubActions => GitHubActions.Instance;
 
-    // [GitRepository] readonly GitRepository Repository;
+    [GitRepository] readonly GitRepository Repository;
 
     readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
 
@@ -55,6 +55,7 @@ class Build : NukeBuild
         .Before(Restore)
         .Executes(() =>
         {
+            EnsureCleanDirectory(ArtifactsDirectory);
         });
 
     Target Restore => _ => _
@@ -93,7 +94,10 @@ class Build : NukeBuild
         .Produces(ArtifactsDirectory / "*.nupkg")
         .Executes(() =>
         {
-            var versionSuffix = GitHubActions?.RunId != null ? $"{GitHubActions.RunId}" : "0-dev";
+            var versionSuffix = GitHubActions?.RunNumber != null ? $"{GitHubActions.RunId}" : "0";
+            if(!Repository.IsOnMainOrMasterBranch())
+                versionSuffix += "-preview";
+
             DotNetPack(_ => _
                 // .SetProject(Solution)
                 .SetConfiguration(Configuration)
