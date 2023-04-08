@@ -80,6 +80,7 @@
               "Compile",
               "Pack",
               "Publish",
+              "PublishToGitHubNuget",
               "Restore",
               "Test"
             ]
@@ -99,6 +100,7 @@
               "Compile",
               "Pack",
               "Publish",
+              "PublishToGitHubNuget",
               "Restore",
               "Test"
             ]

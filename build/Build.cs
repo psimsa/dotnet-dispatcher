@@ -20,7 +20,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     "Continuous build",
     GitHubActionsImage.UbuntuLatest,
     On = new[] { GitHubActionsTrigger.Push },
-    InvokedTargets = new[] {nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack) }
+    InvokedTargets = new[] {nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack), nameof(PublishToGitHubNuget) },
+    EnableGitHubToken = true
     )]
 
 [GitHubActions(
@@ -95,6 +96,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var versionSuffix = GitHubActions?.RunNumber != null ? $"{GitHubActions.RunNumber}" : "0";
+
             if(!Repository.IsOnMainOrMasterBranch())
                 versionSuffix += "-preview";
 
@@ -121,6 +123,19 @@ class Build : NukeBuild
                 .SetTargetPath(ArtifactsDirectory / "*.nupkg")
                 .SetSource("https://api.nuget.org/v3/index.json")
                 .SetApiKey(NuGetApiKey)
+            );
+        });
+
+    Target PublishToGitHubNuget => _ => _
+        .DependsOn(Pack)
+        .Consumes(Pack)
+        .Requires(() => GitHubActions.Token)
+        .Executes(() =>
+        {
+            DotNetNuGetPush(_ => _
+                .SetTargetPath(ArtifactsDirectory / "*.nupkg")
+                .SetSource("https://nuget.pkg.github.com/psimsa/index.json")
+                .SetApiKey(GitHubActions.Token)
             );
         });
 }
