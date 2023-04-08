@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTester", "src\Consol
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotnetDispatcher.Core", "src\DotnetDispatcher.Core\DotnetDispatcher.Core.csproj", "{D5233C43-C155-476C-92FD-436842364008}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{BF6A64D8-4626-4316-8DC7-1A96B445F0AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF6A64D8-4626-4316-8DC7-1A96B445F0AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF6A64D8-4626-4316-8DC7-1A96B445F0AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D729374E-250F-4472-AF37-3579002969EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D729374E-250F-4472-AF37-3579002969EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D729374E-250F-4472-AF37-3579002969EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
