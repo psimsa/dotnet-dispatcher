@@ -94,7 +94,7 @@ class Build : NukeBuild
         .Produces(ArtifactsDirectory / "*.nupkg")
         .Executes(() =>
         {
-            var versionSuffix = GitHubActions?.RunNumber != null ? $"{GitHubActions.RunId}" : "0";
+            var versionSuffix = GitHubActions?.RunNumber != null ? $"{GitHubActions.RunNumber}" : "0";
             if(!Repository.IsOnMainOrMasterBranch())
                 versionSuffix += "-preview";
 
