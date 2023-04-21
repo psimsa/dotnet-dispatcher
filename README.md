@@ -17,7 +17,7 @@ public record SampleQuery : IQuery<SampleQueryResponse>;
 
 public record SampleQueryResponse(string Value);
 
-[GenerateDispatcher(typeof(SampleQuery))]
+[GenerateDispatcher(typeof(SampleQuery), typeof(SampleQueryHandler))]
 public partial class MyAppDispatcher : DispatcherBase
 {
     public MyAppDispatcher(IServiceProvider serviceProvider) : base(serviceProvider)
@@ -95,3 +95,5 @@ var sampleQueryResponse = await appDispatcher.Dispatch(new SampleQuery(), Cancel
 
 Console.WriteLine(sampleQueryResponse.Value);
 ```
+
+#### Enjoy. And feel free to contribute, report bugs, give suggestions and all that good stuff.

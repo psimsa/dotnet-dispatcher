@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DotnetDispatcher.Core\DotnetDispatcher.Core.csproj" />
+  </ItemGroup>
+
 </Project>
