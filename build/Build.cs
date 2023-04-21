@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using NuGet.Versioning;
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
@@ -20,10 +21,16 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     "Continuous build",
     GitHubActionsImage.UbuntuLatest,
     OnPushBranchesIgnore = new[] { "main" },
-    InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack), nameof(PublishToGitHubNuget) },
+    InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack) },
     EnableGitHubToken = true
-    )]
-
+)]
+[GitHubActions(
+    "Manual publish to Github Nuget",
+    GitHubActionsImage.UbuntuLatest,
+    On = new[] { GitHubActionsTrigger.WorkflowDispatch },
+    InvokedTargets = new[] { nameof(Pack), nameof(PublishToGitHubNuget) },
+    EnableGitHubToken = true
+)]
 [GitHubActions(
     "Build main and publish to nuget",
     GitHubActionsImage.UbuntuLatest,
@@ -51,6 +58,11 @@ class Build : NukeBuild
     [GitRepository] readonly GitRepository Repository;
 
     readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
+
+    [LatestNuGetVersion(
+        packageId: "DotnetDispatcher.Core",
+        IncludePrerelease = false)]
+    readonly NuGetVersion DotnetDispatcherVersion;
 
     Target Clean => _ => _
         .Before(Restore)
@@ -92,23 +104,35 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         .DependsOn(Test)
+        .DependsOn(Clean)
         .Produces(ArtifactsDirectory / "*.nupkg")
         .Executes(() =>
         {
-            var versionSuffix = GitHubActions?.RunNumber != null ? $"{GitHubActions.RunNumber}" : "0";
+            var newMajor = 0;
+            var newMinor = 2;
+            var newPatch = DotnetDispatcherVersion.Patch + 1;
 
-            if (!Repository.IsOnMainOrMasterBranch())
-                versionSuffix += "-preview";
+            if (newMajor > DotnetDispatcherVersion.Major)
+            {
+                newMinor = 0;
+                newPatch = 0;
+            }
+            else if (newMinor > DotnetDispatcherVersion.Minor)
+            {
+                newPatch = 0;
+            }
+
+            var newVersion = new NuGetVersion(newMajor, newMinor, newPatch,
+                Repository.IsOnMainOrMasterBranch() ? null : $"preview{GitHubActions?.RunNumber ?? 0}");
 
             DotNetPack(_ => _
-                // .SetProject(Solution)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetNoBuild(true)
                 .SetNoRestore(true)
-                .SetVersion($"0.2.{versionSuffix}")
+                .SetVersion(newVersion.ToString())
                 .SetVerbosity(DotNetVerbosity.Normal)
-                .CombineWith(Solution.AllProjects.Where(_ => _.Name.Contains("DotnetDispatcher")),
+                .CombineWith(Solution.GetSolutionFolder("src").Projects.Where(_ => _.Name.Contains("DotnetDispatcher")),
                     (settings, project) => settings.SetProject(project))
             );
         });
