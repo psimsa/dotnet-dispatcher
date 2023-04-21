@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotnetDispatcher.Attributes\DotnetDispatcher.Attributes.csproj" />
-    <ProjectReference Include="..\DotnetDispatcher.Core\DotnetDispatcher.Core.csproj" />
-    <ProjectReference Include="..\DotnetDispatcher.Generator\DotnetDispatcher.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\src\DotnetDispatcher.Attributes\DotnetDispatcher.Attributes.csproj" />
+    <ProjectReference Include="..\..\src\DotnetDispatcher.Core\DotnetDispatcher.Core.csproj" />
+    <ProjectReference Include="..\..\src\DotnetDispatcher.Generator\DotnetDispatcher.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>                     
 
 </Project>

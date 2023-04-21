@@ -1,15 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-	  <PackageId>$(AssemblyName)</PackageId>
-	  <Authors>Pavel Simsa</Authors>
-	  <Description>Attributes for DotnetDispatcher</Description>
-	  <Copyright>MIT</Copyright>
-	  <PackageProjectUrl>https://github.com/psimsa/dotnet-dispatcher</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/psimsa/dotnet-dispatcher</RepositoryUrl>
-	  <Product>$(AssemblyName)</Product>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <PackageId>$(AssemblyName)</PackageId>
+        <Authors>Pavel Simsa</Authors>
+        <Description>Attributes for DotnetDispatcher</Description>
+        <Copyright>MIT</Copyright>
+        <PackageProjectUrl>https://github.com/psimsa/dotnet-dispatcher</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/psimsa/dotnet-dispatcher</RepositoryUrl>
+        <Product>$(AssemblyName)</Product>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
 
 </Project>
