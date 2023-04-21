@@ -5,9 +5,10 @@ using DotnetDispatcher.Tests.Domain;
 namespace DotnetDispatcher.Tests;
 
 [GenerateDispatcher(typeof(GreetingsQuery), typeof(GreetingsQueryHandler))]
-public partial class TestDispatcher : DispatcherBase
+[GenerateDispatcher(typeof(QueryWithResultType), typeof(QueryWithResultTypeHandler))]
+public partial class QueryDispatcher : DispatcherBase
 {
-    public TestDispatcher(IServiceProvider serviceProvider) : base(serviceProvider)
+    public QueryDispatcher(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
 }

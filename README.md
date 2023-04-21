@@ -74,7 +74,7 @@ public class SampleQueryHandler : IQueryHandler<SampleQuery, SampleQueryResponse
 
 - The API project contains the dispatcher itself
 ```csharp
-[GenerateDispatcher(typeof(SampleQuery))]
+[GenerateDispatcher(typeof(SampleQuery), typeof(SampleQueryHandler))]
 public partial class MyAppDispatcher : DispatcherBase
 {
     public MyAppDispatcher(IServiceProvider serviceProvider) : base(serviceProvider)
