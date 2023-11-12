@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using sf = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace DotnetDispatcher.Generator;
 
@@ -47,7 +48,7 @@ public class DispatcherRegistrationsCodeGenerator : IIncrementalGenerator
 
         foreach (var item in codeToAdd)
         {
-            var tree = SyntaxFactory.ParseSyntaxTree(item.Value);
+            var tree = sf.ParseSyntaxTree(item.Value);
             var formatted = tree.GetRoot().NormalizeWhitespace().ToFullString();
             context.AddSource($"{item.Key}.g.cs", SourceText.From(formatted, Encoding.UTF8));
         }
@@ -80,55 +81,55 @@ public class DispatcherRegistrationsCodeGenerator : IIncrementalGenerator
                         break;
                 }
 
-                bodySyntaxStatements = bodySyntaxStatements.Add(SyntaxFactory.ParseStatement(statement));
+                bodySyntaxStatements = bodySyntaxStatements.Add(sf.ParseStatement(statement));
             }
         }
 
-        bodySyntaxStatements = bodySyntaxStatements.Add(SyntaxFactory.ParseStatement(
+        bodySyntaxStatements = bodySyntaxStatements.Add(sf.ParseStatement(
             $"services.AddSingleton(typeof({dispatcherNamespace}.I{metadata.Key}), typeof({dispatcherNamespace}.{metadata.Key}));"));
 
         var classMembers = new SyntaxList<MemberDeclarationSyntax>()
-            .Add(SyntaxFactory.MethodDeclaration(
+            .Add(sf.MethodDeclaration(
                     new SyntaxList<AttributeListSyntax>(),
-                    SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword),
-                        SyntaxFactory.Token(SyntaxKind.StaticKeyword)),
-                    SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+                    sf.TokenList(sf.Token(SyntaxKind.PublicKeyword),
+                        sf.Token(SyntaxKind.StaticKeyword)),
+                    sf.PredefinedType(sf.Token(SyntaxKind.VoidKeyword)),
                     null,
-                    SyntaxFactory.Identifier($"Register{metadata.Key}AndHandlers"),
+                    sf.Identifier($"Register{metadata.Key}AndHandlers"),
                     null,
-                    SyntaxFactory.ParameterList(),
+                    sf.ParameterList(),
                     new SyntaxList<TypeParameterConstraintClauseSyntax>(),
-                    SyntaxFactory.Block(bodySyntaxStatements),
-                    SyntaxFactory.Token(SyntaxKind.None))
+                    sf.Block(bodySyntaxStatements),
+                    sf.Token(SyntaxKind.None))
                 .AddParameterListParameters(
-                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("services"))
-                        .WithType(SyntaxFactory.IdentifierName("IServiceCollection"))
-                        .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.ThisKeyword)))
+                    sf.Parameter(sf.Identifier("services"))
+                        .WithType(sf.IdentifierName("IServiceCollection"))
+                        .WithModifiers(sf.TokenList(sf.Token(SyntaxKind.ThisKeyword)))
                 )
             );
 
-        var cu = SyntaxFactory.CompilationUnit()
+        var compilationUnit = sf.CompilationUnit()
             .AddUsings(
-                SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("Microsoft.Extensions.DependencyInjection")),
-                SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("DotnetDispatcher.Core")))
+                sf.UsingDirective(sf.IdentifierName("Microsoft.Extensions.DependencyInjection")),
+                sf.UsingDirective(sf.IdentifierName("DotnetDispatcher.Core")))
             .AddMembers(
-                SyntaxFactory
-                    .NamespaceDeclaration(SyntaxFactory.IdentifierName(metadata.First().DispatcherSymbol
+                sf
+                    .NamespaceDeclaration(sf.IdentifierName(metadata.First().DispatcherSymbol
                         .ContainingNamespace.ToDisplayString()))
                     .AddMembers(
-                        SyntaxFactory.ClassDeclaration(
+                        sf.ClassDeclaration(
                             new SyntaxList<AttributeListSyntax>(),
-                            SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword),
-                                SyntaxFactory.Token(SyntaxKind.StaticKeyword)),
-                            SyntaxFactory.Identifier($"Register{metadata.Key}AndHandlersExtensions"),
+                            sf.TokenList(sf.Token(SyntaxKind.PublicKeyword),
+                                sf.Token(SyntaxKind.StaticKeyword)),
+                            sf.Identifier($"Register{metadata.Key}AndHandlersExtensions"),
                             null,
                             null,
                             new SyntaxList<TypeParameterConstraintClauseSyntax>(),
                             classMembers))
             );
 
-        var z = cu.NormalizeWhitespace().ToFullString();
-        return z;
+        return compilationUnit.WithLeadingTrivia(sf.Comment("/// <autogenerated />")).NormalizeWhitespace()
+            .ToFullString();
     }
 
     private static DispatcherGenerationMetadata? GetQueryDefinitionOrNull(GeneratorSyntaxContext context,

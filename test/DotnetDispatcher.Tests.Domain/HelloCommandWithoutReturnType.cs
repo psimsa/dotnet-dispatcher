@@ -2,7 +2,7 @@
 
 namespace DotnetDispatcher.Tests.Domain;
 
-public record HelloWithoutReturnTypeCommand() : ICommand;
+public record HelloWithoutReturnTypeCommand : ICommand;
 
 public class HelloWithoutReturnTypeCommandHandler : ICommandHandler<HelloWithoutReturnTypeCommand>
 {

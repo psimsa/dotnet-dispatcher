@@ -3,12 +3,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-
 using sf = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace DotnetDispatcher.Generator;
@@ -23,7 +21,7 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
 
     private static void RegisterCodeGenerator(IncrementalGeneratorInitializationContext context)
     {
-        IncrementalValueProvider<ImmutableArray<DispatcherGenerationMetadata?>> generateDispatcherItems = context.SyntaxProvider
+        var generateDispatcherItems = context.SyntaxProvider
             .CreateSyntaxProvider(
                 (sn, ct) => Helpers.IsNamedAttribute(sn, ct, Constants.GenerateDispatcherAttributeFull,
                     Constants.GenerateDispatcherAttributeShort), GetQueryDefinitionOrNull)
@@ -38,24 +36,24 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
         if (metadata.IsDefaultOrEmpty)
             return;
 
-        Dictionary<string, string> codeToAdd = new Dictionary<string, string>();
+        var codeToAdd = new Dictionary<string, string>();
 
-        foreach (DispatcherGenerationMetadata queryGenerationMetadata in metadata.OfType<DispatcherGenerationMetadata>())
+        foreach (var queryGenerationMetadata in metadata.OfType<DispatcherGenerationMetadata>())
         {
-            string code = GenerateCode(queryGenerationMetadata);
+            var code = GenerateCode(queryGenerationMetadata);
             codeToAdd.Add(queryGenerationMetadata.QueryHandler.ToDisplayString(), code);
         }
 
-        foreach (KeyValuePair<string, string> item in codeToAdd)
+        foreach (var item in codeToAdd)
             context.AddSource($"{item.Key}.g.cs", SourceText.From(item.Value, Encoding.UTF8));
     }
 
     private static string GenerateCode(DispatcherGenerationMetadata metadata)
     {
-        string fullQueryName = metadata.QuerySymbol.ToDisplayString();
-        string? fullResponseName = metadata.ResponseSymbol?.ToDisplayString();
+        var fullQueryName = metadata.QuerySymbol.ToDisplayString();
+        var fullResponseName = metadata.ResponseSymbol?.ToDisplayString();
 
-        IEnumerable<UsingDirectiveSyntax> namespaceImports = new[]
+        var namespaceImports = new[]
             {
                 metadata.QuerySymbol.ContainingNamespace.ToDisplayString(),
                 metadata.ResponseSymbol?.ContainingNamespace.ToDisplayString()
@@ -67,7 +65,7 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
             .Select(ns => sf.UsingDirective(sf.IdentifierName(ns!)))
             .Union(new[] { sf.UsingDirective(sf.IdentifierName("DotnetDispatcher.Core")) });
 
-        ParameterSyntax cancellationTokenParameter = sf.Parameter(sf.Identifier("cancellationToken"))
+        var cancellationTokenParameter = sf.Parameter(sf.Identifier("cancellationToken"))
             .WithType(sf.IdentifierName("CancellationToken"))
             .WithDefault(sf.EqualsValueClause(sf.LiteralExpression(SyntaxKind.DefaultLiteralExpression)));
 
@@ -75,9 +73,9 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
             ? sf.IdentifierName(sf.Identifier("Task"))
             : sf.GenericName(sf.Identifier("Task"))
                 .WithTypeArgumentList(sf.TypeArgumentList(
-                    sf.SingletonSeparatedList<global::Microsoft.CodeAnalysis.CSharp.Syntax.TypeSyntax>(sf.IdentifierName(fullResponseName))));
+                    sf.SingletonSeparatedList<TypeSyntax>(sf.IdentifierName(fullResponseName))));
 
-        MethodDeclarationSyntax dispatchMethodDeclarationSyntax = sf.MethodDeclaration(
+        var dispatchMethodDeclarationSyntax = sf.MethodDeclaration(
                 returnTypeSyntax,
                 sf.Identifier("Dispatch"))
             .AddModifiers(sf.Token(SyntaxKind.PublicKeyword))
@@ -87,18 +85,18 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
                 cancellationTokenParameter
             );
 
-        InterfaceDeclarationSyntax dispatcherInterface = sf.InterfaceDeclaration($"I{metadata.DispatcherSymbol.Name}")
+        var dispatcherInterface = sf.InterfaceDeclaration($"I{metadata.DispatcherSymbol.Name}")
             .AddModifiers(sf.Token(SyntaxKind.PublicKeyword), sf.Token(SyntaxKind.PartialKeyword))
             .AddMembers(dispatchMethodDeclarationSyntax.WithSemicolonToken(sf.Token(SyntaxKind.SemicolonToken)));
 
-        GenericNameSyntax queryTypes = sf
+        var queryTypes = sf
             .GenericName(metadata.CqrsType == CqrsType.Query ? "IQueryHandler" : "ICommandHandler")
             .WithTypeArgumentList(sf.TypeArgumentList().AddArguments(sf.IdentifierName(fullQueryName)));
 
         if (fullResponseName != null)
             queryTypes = queryTypes.AddTypeArgumentListArguments(sf.IdentifierName(fullResponseName));
 
-        InvocationExpressionSyntax queryExpression = sf.InvocationExpression(
+        var queryExpression = sf.InvocationExpression(
             sf.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
                 sf.InvocationExpression(sf.GenericName("Get").WithTypeArgumentList(
                     sf.TypeArgumentList(sf.SingletonSeparatedList<TypeSyntax>(queryTypes)))
@@ -109,7 +107,7 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
             )
         );
 
-        ClassDeclarationSyntax dispatcherClass = sf.ClassDeclaration(metadata.DispatcherSymbol.Name)
+        var dispatcherClass = sf.ClassDeclaration(metadata.DispatcherSymbol.Name)
             .AddModifiers(sf.Token(SyntaxKind.PublicKeyword),
                 sf.Token(SyntaxKind.PartialKeyword))
             .AddBaseListTypes(sf.SimpleBaseType(sf.IdentifierName($"I{metadata.DispatcherSymbol.Name}")))
@@ -118,24 +116,27 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
                     .WithSemicolonToken(sf.Token(SyntaxKind.SemicolonToken))
             );
 
-        CompilationUnitSyntax compilationUnit = sf.CompilationUnit()
+        var compilationUnit = sf.CompilationUnit()
             .AddUsings(namespaceImports.ToArray())
-            .AddMembers(sf.NamespaceDeclaration(sf.IdentifierName(metadata.DispatcherSymbol.ContainingNamespace.ToDisplayString()))
+            .AddMembers(sf
+                .NamespaceDeclaration(
+                    sf.IdentifierName(metadata.DispatcherSymbol.ContainingNamespace.ToDisplayString()))
                 .AddMembers(
                     dispatcherInterface,
                     dispatcherClass
                 )
             );
 
-        return compilationUnit.NormalizeWhitespace().ToFullString();
+        return compilationUnit.WithLeadingTrivia(sf.Comment("/// <autogenerated />")).NormalizeWhitespace()
+            .ToFullString();
     }
 
     private static DispatcherGenerationMetadata? GetQueryDefinitionOrNull(GeneratorSyntaxContext context,
         CancellationToken token)
     {
-        AttributeSyntax attributeSyntax = (AttributeSyntax)context.Node;
+        var attributeSyntax = (AttributeSyntax)context.Node;
 
-        INamedTypeSymbol? dispatcherTypeSymbol = attributeSyntax.Parent?.Parent switch
+        var dispatcherTypeSymbol = attributeSyntax.Parent?.Parent switch
         {
             ClassDeclarationSyntax classDeclaration =>
                 context.SemanticModel.GetDeclaredSymbol(classDeclaration),
@@ -144,8 +145,8 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
         if (dispatcherTypeSymbol is null)
             return null;
 
-        SeparatedSyntaxList<AttributeArgumentSyntax>? attributeArguments = attributeSyntax.ArgumentList?.Arguments;
-        INamedTypeSymbol? queryType = attributeArguments?.FirstOrDefault()?.Expression switch
+        var attributeArguments = attributeSyntax.ArgumentList?.Arguments;
+        var queryType = attributeArguments?.FirstOrDefault()?.Expression switch
         {
             TypeOfExpressionSyntax typeOfExpressionSyntax =>
                 context.SemanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type as INamedTypeSymbol,
@@ -164,7 +165,7 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
                 _ => null
             };
 
-        INamedTypeSymbol? cqrsInterface = queryType.AllInterfaces.FirstOrDefault(_ =>
+        var cqrsInterface = queryType.AllInterfaces.FirstOrDefault(_ =>
             (_.Name == "IQuery" && _.TypeArguments.Length == 1) ||
             (_.Name == "ICommand" && _.TypeArguments.Length < 2));
 
