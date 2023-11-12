@@ -96,7 +96,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var newMajor = 0;
-            var newMinor = 2;
+            var newMinor = 3;
             var newPatch = DotnetDispatcherVersion.Patch + 1;
 
             if (newMajor > DotnetDispatcherVersion.Major)
