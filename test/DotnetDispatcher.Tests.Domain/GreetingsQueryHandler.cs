@@ -1,10 +1,6 @@
 ﻿using DotnetDispatcher.Core;
 
-namespace DotnetDispatcher.Tests.Domain;
-
-public record GreetingsQuery(string Name) : IQuery<GreetingsQueryResponse>;
-
-public record GreetingsQueryResponse(string Greeting);
+namespace DotnetDispatcher.Tests.Domain.Query;
 
 public class GreetingsQueryHandler : IQueryHandler<GreetingsQuery, GreetingsQueryResponse>
 {

@@ -1,20 +1,13 @@
-using System;
 using System.Linq;
 using NuGet.Versioning;
 using Nuke.Common;
-using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
-using Nuke.Common.Execution;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
-using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
@@ -35,34 +28,28 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     "Build main and publish to nuget",
     GitHubActionsImage.UbuntuLatest,
     OnPushBranches = new[] { "main" },
-    InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish) },
+    InvokedTargets = new[]
+        { nameof(Clean), nameof(Compile), nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish) },
     ImportSecrets = new[] { nameof(NuGetApiKey) },
     EnableGitHubToken = true)]
 class Build : NukeBuild
 {
-    /// Support plugins are available for:
-    ///   - JetBrains ReSharper        https://nuke.build/resharper
-    ///   - JetBrains Rider            https://nuke.build/rider
-    ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
-    ///   - Microsoft VSCode           https://nuke.build/vscode
-    public static int Main() => Execute<Build>(x => x.Compile);
+    readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [Parameter][Secret] readonly string NuGetApiKey;
+    [LatestNuGetVersion(
+        "DotnetDispatcher.Core",
+        IncludePrerelease = false)]
+    readonly NuGetVersion DotnetDispatcherVersion;
 
-    [Solution(GenerateProjects = true)] readonly Solution Solution;
-    GitHubActions GitHubActions => GitHubActions.Instance;
+    [Parameter] [Secret] readonly string NuGetApiKey;
 
     [GitRepository] readonly GitRepository Repository;
 
-    readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
-
-    [LatestNuGetVersion(
-        packageId: "DotnetDispatcher.Core",
-        IncludePrerelease = false)]
-    readonly NuGetVersion DotnetDispatcherVersion;
+    [Solution(GenerateProjects = true)] readonly Solution Solution;
+    GitHubActions GitHubActions => GitHubActions.Instance;
 
     Target Clean => _ => _
         .Before(Restore)
@@ -161,4 +148,11 @@ class Build : NukeBuild
                 .SetApiKey(GitHubActions.Token)
             );
         });
+
+    /// Support plugins are available for:
+    /// - JetBrains ReSharper        https://nuke.build/resharper
+    /// - JetBrains Rider            https://nuke.build/rider
+    /// - Microsoft VisualStudio     https://nuke.build/visualstudio
+    /// - Microsoft VSCode           https://nuke.build/vscode
+    public static int Main() => Execute<Build>(x => x.Compile);
 }

@@ -2,11 +2,11 @@
 
 namespace DotnetDispatcher.Attributes
 {
-    [AttributeUsage(validOn: AttributeTargets.Class, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class GenerateDispatcherAttribute : Attribute
     {
-        private readonly Type _queryType;
         private readonly Type _handlerType;
+        private readonly Type _queryType;
 
         public GenerateDispatcherAttribute(Type queryType)
         {

@@ -1,4 +1,3 @@
-using DotnetDispatcher.Core;
 using DotnetDispatcher.Tests.Domain;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +21,7 @@ public class QueryDispatcherShould
         var dispatcher = GetDispatcher();
 
         var result = await dispatcher.Dispatch(new QueryWithResultType("Pete"));
-        
+
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Data);
         Assert.Equal("Greetings for Pete...", result.Data.Greeting);
@@ -34,6 +33,6 @@ public class QueryDispatcherShould
         services.RegisterQueryDispatcherAndHandlers();
 
         var serviceProvider = services.BuildServiceProvider();
-       return serviceProvider.GetService<IQueryDispatcher>()!;
+        return serviceProvider.GetService<IQueryDispatcher>()!;
     }
 }
