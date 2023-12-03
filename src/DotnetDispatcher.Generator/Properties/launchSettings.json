@@ -2,7 +2,7 @@
   "profiles": {
     "Analyzer": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "..\\ConsoleTester\\ConsoleTester.csproj"
+      "targetProject": "..\\..\\test\\DotnetDispatcher.Tests\\DotnetDispatcher.Tests.csproj"
     }
   }
 }

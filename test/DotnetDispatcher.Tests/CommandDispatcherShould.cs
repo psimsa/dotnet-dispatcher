@@ -1,4 +1,3 @@
-using DotnetDispatcher.Core;
 using DotnetDispatcher.Tests.Domain;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +9,7 @@ public class CommandDispatcherShould
     public async Task GenerateAndDispatchSimpleCommand()
     {
         var dispatcher = GetDispatcher();
-        
+
         var response = await dispatcher.Dispatch(new DeleteDatabaseCommand());
 
         Assert.True(response.IsSuccess);

@@ -7,13 +7,15 @@ namespace DotnetDispatcher.Generator;
 
 internal static class Helpers
 {
-    internal static string? ExtractName(NameSyntax? name) =>
-        name switch
+    internal static string? ExtractName(NameSyntax? name)
+    {
+        return name switch
         {
             SimpleNameSyntax ins => ins.Identifier.Text,
             QualifiedNameSyntax qns => qns.Right.Identifier.Text,
             _ => null
         };
+    }
 
     internal static bool IsNamedAttribute(SyntaxNode syntaxNode,
         CancellationToken _, params string[] attributes)
@@ -21,7 +23,7 @@ internal static class Helpers
         if (syntaxNode is not AttributeSyntax attribute)
             return false;
 
-        var name = Helpers.ExtractName(attribute.Name);
+        var name = ExtractName(attribute.Name);
         return name is not null && attributes.Contains(name);
     }
 }

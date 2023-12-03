@@ -21,4 +21,8 @@
         </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\DotnetDispatcher.Core\DotnetDispatcher.Core.csproj" />
+    </ItemGroup>
+
 </Project>
