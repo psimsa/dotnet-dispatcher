@@ -38,7 +38,7 @@ jobs:
         run: ./build.cmd Clean Compile Test Pack
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: artifacts
           path: artifacts
