@@ -85,7 +85,7 @@ class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetNoBuild(true)
                 .SetNoRestore(true)
-                .SetVerbosity(DotNetVerbosity.Normal)
+                .SetVerbosity(DotNetVerbosity.normal)
             );
         });
 
@@ -96,7 +96,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var newMajor = 0;
-            var newMinor = 3;
+            var newMinor = 4;
             var newPatch = DotnetDispatcherVersion.Patch + 1;
 
             if (newMajor > DotnetDispatcherVersion.Major)
@@ -118,7 +118,7 @@ class Build : NukeBuild
                 .SetNoBuild(true)
                 .SetNoRestore(true)
                 .SetVersion(newVersion.ToString())
-                .SetVerbosity(DotNetVerbosity.Normal)
+                .SetVerbosity(DotNetVerbosity.normal)
                 .CombineWith(Solution.GetSolutionFolder("src").Projects.Where(_ => _.Name.Contains("DotnetDispatcher")),
                     (settings, project) => settings.SetProject(project))
             );
