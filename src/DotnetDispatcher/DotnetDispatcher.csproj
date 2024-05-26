@@ -3,9 +3,10 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net8.0</TargetFrameworks>
 		<Nullable Condition=" '$(TargetFramework)' != 'netstandard2.0'">warnings</Nullable>
+		<LangVersion>latest</LangVersion>
 		<PackageId>$(AssemblyName)</PackageId>
 		<Authors>Pavel Simsa</Authors>
-		<Description>CQRS classes for DotnetDispatcher</Description>
+		<Description>DotnetDispatcher CQRS classes and attributes</Description>
 		<Copyright>MIT</Copyright>
 		<PackageProjectUrl>https://github.com/psimsa/dotnet-dispatcher</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/psimsa/dotnet-dispatcher</RepositoryUrl>
@@ -27,5 +28,11 @@
 	</ItemGroup>
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0'">
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DotnetDispatcher.Generator\DotnetDispatcher.Generator.csproj" PrivateAssets="All" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="$(OutputPath)\netstandard2.0\DotnetDispatcher.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
 </Project>
