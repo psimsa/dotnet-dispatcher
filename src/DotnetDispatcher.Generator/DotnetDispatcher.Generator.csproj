@@ -12,7 +12,7 @@
         <PackageProjectUrl>https://github.com/psimsa/dotnet-dispatcher</PackageProjectUrl>
         <RepositoryUrl>https://github.com/psimsa/dotnet-dispatcher</RepositoryUrl>
         <Product>$(AssemblyName)</Product>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -34,8 +34,5 @@
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\DotnetDispatcher.Attributes\DotnetDispatcher.Attributes.csproj" />
     </ItemGroup>
 </Project>

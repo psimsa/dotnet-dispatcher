@@ -23,7 +23,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     On = new[] { GitHubActionsTrigger.WorkflowDispatch },
     InvokedTargets = new[] { nameof(Pack), nameof(PublishToGitHubNuget) },
     EnableGitHubToken = true
-)]
+    )]
 [GitHubActions(
     "Build main and publish to nuget",
     GitHubActionsImage.UbuntuLatest,
@@ -31,7 +31,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     InvokedTargets = new[]
         { nameof(Clean), nameof(Compile), nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish) },
     ImportSecrets = new[] { nameof(NuGetApiKey) },
-    EnableGitHubToken = true)]
+    EnableGitHubToken = true
+    )]
 class Build : NukeBuild
 {
     readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
@@ -40,11 +41,11 @@ class Build : NukeBuild
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [LatestNuGetVersion(
-        "DotnetDispatcher.Core",
+        "DotnetDispatcher",
         IncludePrerelease = false)]
     readonly NuGetVersion DotnetDispatcherVersion;
 
-    [Parameter] [Secret] readonly string NuGetApiKey;
+    [Parameter][Secret] readonly string NuGetApiKey;
 
     [GitRepository] readonly GitRepository Repository;
 
@@ -55,7 +56,7 @@ class Build : NukeBuild
         .Before(Restore)
         .Executes(() =>
         {
-            EnsureCleanDirectory(ArtifactsDirectory);
+            ArtifactsDirectory.CreateOrCleanDirectory();
         });
 
     Target Restore => _ => _
@@ -96,17 +97,20 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var newMajor = 0;
-            var newMinor = 4;
-            var newPatch = DotnetDispatcherVersion.Patch + 1;
+            var newMinor = 8;
+            var newPatch = DotnetDispatcherVersion?.Patch ?? 0 + 1;
 
-            if (newMajor > DotnetDispatcherVersion.Major)
+            if (DotnetDispatcherVersion != null)
             {
-                newMinor = 0;
-                newPatch = 0;
-            }
-            else if (newMinor > DotnetDispatcherVersion.Minor)
-            {
-                newPatch = 0;
+                if (newMajor > DotnetDispatcherVersion.Major)
+                {
+                    newMinor = 0;
+                    newPatch = 0;
+                }
+                else if (newMinor > DotnetDispatcherVersion.Minor)
+                {
+                    newPatch = 0;
+                }
             }
 
             var newVersion = new NuGetVersion(newMajor, newMinor, newPatch,
@@ -119,8 +123,7 @@ class Build : NukeBuild
                 .SetNoRestore(true)
                 .SetVersion(newVersion.ToString())
                 .SetVerbosity(DotNetVerbosity.normal)
-                .CombineWith(Solution.GetSolutionFolder("src").Projects.Where(_ => _.Name.Contains("DotnetDispatcher")),
-                    (settings, project) => settings.SetProject(project))
+                .SetProject(Solution.src.DotnetDispatcher)
             );
         });
 

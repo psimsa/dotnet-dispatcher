@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DotnetDispatcher.Core\DotnetDispatcher.Core.csproj" />
+    <ProjectReference Include="..\..\src\DotnetDispatcher\DotnetDispatcher.csproj" />
   </ItemGroup>
 
 </Project>
