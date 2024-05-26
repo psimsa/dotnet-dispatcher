@@ -40,7 +40,7 @@ class Build : NukeBuild
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [LatestNuGetVersion(
-        "DotnetDispatcher.Core",
+        "DotnetDispatcher",
         IncludePrerelease = false)]
     readonly NuGetVersion DotnetDispatcherVersion;
 
@@ -96,7 +96,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var newMajor = 0;
-            var newMinor = 4;
+            var newMinor = 8;
             var newPatch = DotnetDispatcherVersion.Patch + 1;
 
             if (newMajor > DotnetDispatcherVersion.Major)
@@ -119,8 +119,7 @@ class Build : NukeBuild
                 .SetNoRestore(true)
                 .SetVersion(newVersion.ToString())
                 .SetVerbosity(DotNetVerbosity.normal)
-                .CombineWith(Solution.GetSolutionFolder("src").Projects.Where(_ => _.Name.Contains("DotnetDispatcher")),
-                    (settings, project) => settings.SetProject(project))
+                .SetProject(Solution.src.DotnetDispatcher)
             );
         });
 
