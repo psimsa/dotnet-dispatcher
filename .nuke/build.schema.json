@@ -9,10 +9,7 @@
         "Configuration": {
           "type": "string",
           "description": "Configuration to build - Default is 'Debug' (local) or 'Release' (server)",
-          "enum": [
-            "Debug",
-            "Release"
-          ]
+          "enum": ["Debug", "Release"]
         },
         "Continue": {
           "type": "boolean",
@@ -109,12 +106,7 @@
         "Verbosity": {
           "type": "string",
           "description": "Logging verbosity during build execution. Default is 'Normal'",
-          "enum": [
-            "Minimal",
-            "Normal",
-            "Quiet",
-            "Verbose"
-          ]
+          "enum": ["Minimal", "Normal", "Quiet", "Verbose"]
         }
       }
     }

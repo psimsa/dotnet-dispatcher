@@ -1,38 +1,58 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Authors>Pavel Simsa</Authors>
+    <Description>Code generator for DotnetDispatcher</Description>
+    <Copyright>MIT</Copyright>
+    <PackageProjectUrl
+      >https://github.com/psimsa/dotnet-dispatcher</PackageProjectUrl
+    >
+    <RepositoryUrl>https://github.com/psimsa/dotnet-dispatcher</RepositoryUrl>
+    <Product>$(AssemblyName)</Product>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference
+      Include="Microsoft.CodeAnalysis.CSharp.Workspaces"
+      Version="4.11.0"
+      PrivateAssets="all"
+    />
+    <PackageReference
+      Update="Microsoft.CodeAnalysis.NetAnalyzers"
+      Version="8.0.0"
+    >
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets
+        >runtime; build; native; contentfiles; analyzers</IncludeAssets
+      >
+    </PackageReference>
+    <PackageReference
+      Update="Microsoft.VisualStudio.Threading.Analyzers"
+      Version="17.11.20"
+    >
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets
+        >runtime; build; native; contentfiles; analyzers</IncludeAssets
+      >
+    </PackageReference>
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>latest</LangVersion>
-        <Nullable>enable</Nullable>
-        <IsRoslynComponent>true</IsRoslynComponent>
-        <PackageId>$(AssemblyName)</PackageId>
-        <Authors>Pavel Simsa</Authors>
-        <Description>Code generator for DotnetDispatcher</Description>
-        <Copyright>MIT</Copyright>
-        <PackageProjectUrl>https://github.com/psimsa/dotnet-dispatcher</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/psimsa/dotnet-dispatcher</RepositoryUrl>
-        <Product>$(AssemblyName)</Product>
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    </PropertyGroup>
-    <ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0" PrivateAssets="all" />
-		<PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
-		<PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.11.20">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
-		
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-		
-        <None Include="..\..\README.md">
-            <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
-        </None>
-    </ItemGroup>
+    <None
+      Include="$(OutputPath)\$(AssemblyName).dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
+
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 </Project>

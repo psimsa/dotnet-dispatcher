@@ -1,17 +1,9 @@
 {
-  "extends": [
-    "config:base",
-    "github>ofcoursedude/renovate-config"
-  ],
+  "extends": ["config:base", "github>ofcoursedude/renovate-config"],
   "packageRules": [
     {
-        "matchUpdateTypes": [
-            "patch",
-            "pin",
-            "digest",
-            "minor"
-        ],
-        "automerge": false
+      "matchUpdateTypes": ["patch", "pin", "digest", "minor"],
+      "automerge": false
     }
   ]
 }
