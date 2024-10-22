@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable UnusedMember.Global
 
-namespace DotnetDispatcher.Core;
+namespace DotnetDispatcher;
 
 public abstract class DispatcherBase
 {

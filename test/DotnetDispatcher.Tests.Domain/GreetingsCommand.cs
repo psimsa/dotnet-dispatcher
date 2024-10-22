@@ -1,6 +1,4 @@
-﻿using DotnetDispatcher.Core;
-
-namespace DotnetDispatcher.Tests.Domain;
+﻿namespace DotnetDispatcher.Tests.Domain;
 
 public record DeleteDatabaseCommand : ICommand<Result>;
 
