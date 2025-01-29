@@ -7,12 +7,12 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
+using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
     "Continuous build",
     GitHubActionsImage.UbuntuLatest,
-    AutoGenerate = false,
     OnPushBranchesIgnore = new[] { "main" },
     InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack) },
     EnableGitHubToken = true
@@ -21,7 +21,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     "Manual publish to Github Nuget",
     GitHubActionsImage.UbuntuLatest,
     On = new[] { GitHubActionsTrigger.WorkflowDispatch },
-    AutoGenerate = false,
     InvokedTargets = new[] { nameof(Pack), nameof(PublishToGitHubNuget) },
     EnableGitHubToken = true
     )]
@@ -29,7 +28,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     "Build main and publish to nuget",
     GitHubActionsImage.UbuntuLatest,
     OnPushBranches = new[] { "main" },
-    AutoGenerate = false,
     InvokedTargets = new[]
         { nameof(Clean), nameof(Compile), nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish) },
     ImportSecrets = new[] { nameof(NuGetApiKey) },
