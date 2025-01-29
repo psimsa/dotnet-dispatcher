@@ -1,99 +1,101 @@
-# dotnet-dispatcher 0.1
-A simple dispatcher for .NET Core that uses Roslyn code generation to emit CQRS dispatcher code. Currently in extremely early stage, but I feel there's something to it.
+﻿# DotNet Dispatcher - AOT-Friendly CQRS Dispatcher
 
-## Why?
-I'm a great 'not-friend' of things like reflection, Activator and runtime type determination. When writing CQRS code, I would like to have my dispatcher code generated in compile time, with all optimalizations and other goodies that come with it.
+## Overview
+**DotNet Dispatcher** is a lightweight, compile-time generated CQRS dispatcher for .NET. By leveraging Roslyn code generation, this framework eliminates runtime reflection, making it highly **AOT-friendly** and **performance-efficient**.
 
-## Enter DotnetDispatcher
-To generate a dispatcher is as simple as this:
+With **DotNet Dispatcher**, developers can define **commands and queries** with their corresponding handlers, and the dispatcher is automatically generated at compile time.
+
+## Features
+✅ **Zero Runtime Reflection** - Uses Roslyn to generate code at compile time.  
+✅ **AOT-Friendly** - Ideal for .NET Native AOT scenarios.  
+✅ **Lightweight** - No additional runtime dependencies or complexity.  
+✅ **Explicit yet Automated Wiring** - Just define your handlers, and the generator does the rest.  
+✅ **Fast & Efficient** - No runtime service lookups; everything is wired at compile time.  
+
+## Installation
+```sh
+# Clone the repository
+$ git clone https://github.com/psimsa/dotnet-dispatcher.git
+$ cd dotnet-dispatcher
+
+# Add to your .NET project
+$ dotnet add package DotNetDispatcher
+```
+
+## Getting Started
+
+### 1. Define a Command & Handler
+Create a command by implementing `ICommand<TResponse>` and a corresponding handler:
 
 ```csharp
-using DotnetDispatcher.Attributes;
-using DotnetDispatcher.Core;
+public record PlaceOrderCommand(string ProductId, int Quantity) : ICommand<OrderResponse>;
 
-namespace ConsoleTester; 
-
-public record SampleQuery : IQuery<SampleQueryResponse>;
-
-public record SampleQueryResponse(string Value);
-
-[GenerateDispatcher(typeof(SampleQuery), typeof(SampleQueryHandler))]
-public partial class MyAppDispatcher : DispatcherBase
+public class PlaceOrderHandler : ICommandHandler<PlaceOrderCommand, OrderResponse>
 {
-    public MyAppDispatcher(IServiceProvider serviceProvider) : base(serviceProvider)
+    public Task<OrderResponse> Handle(PlaceOrderCommand command)
     {
+        return Task.FromResult(new OrderResponse(Guid.NewGuid(), "Order Placed Successfully"));
     }
 }
 ```
 
-This will generate a dispatcher that looks like this:
-
+### 2. Define a Query & Handler
 ```csharp
-namespace ConsoleTester
+public record GetOrderQuery(Guid OrderId) : IQuery<OrderResponse>;
+
+public class GetOrderHandler : IQueryHandler<GetOrderQuery, OrderResponse>
 {
-    public partial interface IMyAppDispatcher
+    public Task<OrderResponse> Handle(GetOrderQuery query)
     {
-        Task<SampleQueryResponse> Dispatch(SampleQuery unit, CancellationToken cancellationToken = default);
-    }
-    public partial class MyAppDispatcher : IMyAppDispatcher
-    {
-        public Task<SampleQueryResponse> Dispatch(SampleQuery unit, CancellationToken cancellationToken = default) =>
-            Get<IQueryHandler<SampleQuery, SampleQueryResponse>>().Query(unit, cancellationToken);
-    }
-}
-```
-Aside from the Dispatch code, a matching interface is also generated. This allows for easy mocking of the dispatcher as well as using dependency injection. You can have multiple dispatchers in a project, if you want to. Alternatively, you can repeat the use of the GenerateDispatcher attribute with other types that implement `IQuery<TResponse>`, `ICommand<TResponse>`  or `ICommand`.
-
-
-## Download and install
-There are three nuget packages to install:
-- `DotnetDispatcher.Core` - contains interfaces your commands and queries should implement, as well as the `DispatcherBase` class
-- `DotnetDispatcher.Attributes` - contains the `GenerateDispatcher` attribute
-- `DotnetDispatcher.Generator` - contains the code generator
-
-## How to use
-Assuming you have an API project and a Domain project in your solution, where the generated dispatcher is part of the API project and the commands and queries are part of the Domain project:
-- The API project should reference the Domain project, as well as the `DotnetDispatcher.Generator` and `DotnetDispatcher.Attributes` packages
-- The Domain project should reference the `DotnetDispatcher.Core` package
-
-The actual implementation in the projects is as such:
-- The domain project contains the query and the query handler
-```csharp
-public record SampleQuery : IQuery<SampleQueryResponse>;
-
-public record SampleQueryResponse(string Value);
-
-public class SampleQueryHandler : IQueryHandler<SampleQuery, SampleQueryResponse>
-{
-    public Task<SampleQueryResponse> Query(SampleQuery query, CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult(new SampleQueryResponse("nah"));
+        return Task.FromResult(new OrderResponse(query.OrderId, "Order Retrieved"));
     }
 }
 ```
 
-- The API project contains the dispatcher itself
+### 3. Use the Dispatcher
+After compilation, the **dispatcher is automatically generated** and can be injected like this:
+
 ```csharp
-[GenerateDispatcher(typeof(SampleQuery), typeof(SampleQueryHandler))]
-public partial class MyAppDispatcher : DispatcherBase
+public class OrderService
 {
-    public MyAppDispatcher(IServiceProvider serviceProvider) : base(serviceProvider)
+    private readonly IDispatcher _dispatcher;
+    
+    public OrderService(IDispatcher dispatcher)
     {
+        _dispatcher = dispatcher;
+    }
+    
+    public async Task<OrderResponse> PlaceOrderAsync(string productId, int quantity)
+    {
+        return await _dispatcher.Send(new PlaceOrderCommand(productId, quantity));
     }
 }
 ```
-This generates the dispatcher code as well as an IServiceCollection extension method that allows you to register the dispatcher in the DI container. You can use it in the API project like this:
-```csharp
-var serviceCollection = new ServiceCollection();
 
-serviceCollection.RegisterMyAppDispatcherAndHandlers();
+## How It Works
+- **Roslyn Source Generator** scans for commands and queries marked with `[GenerateDispatcher]`.
+- The dispatcher implementation is generated **at compile time**, avoiding reflection-based dependency resolution.
+- The generated dispatcher is **automatically registered in DI**, allowing easy injection and usage.
 
-var services = serviceCollection.BuildServiceProvider();
+## Benefits Over MediatR
+| Feature           | MediatR                     | DotNet Dispatcher |
+|------------------|---------------------------|-------------------|
+| **Reflection-Free** | ❌ Uses runtime reflection | ✅ No runtime reflection |
+| **AOT-Friendly**  | ❌ May have issues         | ✅ Fully compatible |
+| **Performance**   | ⚠️ Slight overhead        | ✅ Optimized compile-time wiring |
+| **Setup**         | ✅ Easy                     | ✅ Easy (via source generator) |
 
-var appDispatcher = services.GetRequiredService<IMyAppDispatcher>();
-var sampleQueryResponse = await appDispatcher.Dispatch(new SampleQuery(), CancellationToken.None);
+## Configuration & Customization
+You can customize the dispatcher behavior by modifying the source generator logic or extending handler interfaces.
 
-Console.WriteLine(sampleQueryResponse.Value);
-```
+## Contributing
+We welcome contributions! Please feel free to:
+- Open issues for bugs or feature requests.
+- Submit PRs to enhance functionality or improve documentation.
 
-#### Enjoy. And feel free to contribute, report bugs, give suggestions and all that good stuff.
+## License
+This project is licensed under the **MIT License**.
+
+## Author
+Maintained by [psimsa](https://github.com/psimsa).
+
