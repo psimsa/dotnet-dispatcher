@@ -98,8 +98,8 @@ class Build : NukeBuild
         .Produces(ArtifactsDirectory / "*.nupkg")
         .Executes(() =>
         {
-            var newMajor = 0;
-            var newMinor = 8;
+            var newMajor = 1;
+            var newMinor = 0;
             var newPatch = DotnetDispatcherVersion?.Patch ?? 0 + 1;
 
             if (DotnetDispatcherVersion != null)
