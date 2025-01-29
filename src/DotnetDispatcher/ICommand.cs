@@ -1,6 +1,5 @@
-﻿namespace DotnetDispatcher.Core
+﻿namespace DotnetDispatcher;
+
+public interface ICommand : ICommand<object>
 {
-    public interface ICommand : ICommand<object>
-    {
-    }
 }

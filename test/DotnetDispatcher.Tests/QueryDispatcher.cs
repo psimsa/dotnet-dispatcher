@@ -1,5 +1,5 @@
 using DotnetDispatcher.Attributes;
-using DotnetDispatcher.Core;
+using DotnetDispatcher;
 using DotnetDispatcher.Tests.Domain;
 
 namespace DotnetDispatcher.Tests;

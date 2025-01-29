@@ -1,4 +1,4 @@
-﻿using DotnetDispatcher.Core;
+﻿using DotnetDispatcher;
 
 namespace DotnetDispatcher.Tests.Domain;
 
