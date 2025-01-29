@@ -75,7 +75,7 @@ public class OrderService
 ## How It Works
 - **Roslyn Source Generator** scans for commands and queries marked with `[GenerateDispatcher]`.
 - The dispatcher implementation is generated **at compile time**, avoiding reflection-based dependency resolution.
-- The generated dispatcher is **automatically registered in DI**, allowing easy injection and usage.
+- Aside from the generated dispatcher, the generator also creates an extension method for `IServiceCollection` called `RegisterCommandDispatcherAndHandlers` that ensures necessary dependencies **are automatically registered in DI**, allowing easy injection and usage. Simply call `services.RegisterCommandDispatcherAndHandlers()` during your DI setup.
 
 ## Benefits Over MediatR
 | Feature           | MediatR                     | DotNet Dispatcher |
