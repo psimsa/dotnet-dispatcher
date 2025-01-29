@@ -3,20 +3,19 @@ using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable UnusedMember.Global
 
-namespace DotnetDispatcher.Core
+namespace DotnetDispatcher;
+
+public abstract class DispatcherBase
 {
-    public abstract class DispatcherBase
+    private readonly IServiceProvider _serviceProvider;
+
+    protected DispatcherBase(IServiceProvider serviceProvider)
     {
-        private readonly IServiceProvider _serviceProvider;
+        _serviceProvider = serviceProvider;
+    }
 
-        protected DispatcherBase(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        protected T Get<T>()
-        {
-            return _serviceProvider.GetRequiredService<T>();
-        }
+    protected T Get<T>()
+    {
+        return _serviceProvider.GetRequiredService<T>();
     }
 }

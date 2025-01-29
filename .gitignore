@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /.idea
 /dotnet-dispatcher.lutconfig
+
+.nuke/temp

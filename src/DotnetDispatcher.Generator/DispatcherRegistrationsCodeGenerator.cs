@@ -111,7 +111,7 @@ public class DispatcherRegistrationsCodeGenerator : IIncrementalGenerator
         var compilationUnit = sf.CompilationUnit()
             .AddUsings(
                 sf.UsingDirective(sf.IdentifierName("Microsoft.Extensions.DependencyInjection")),
-                sf.UsingDirective(sf.IdentifierName("DotnetDispatcher.Core")))
+                sf.UsingDirective(sf.IdentifierName("DotnetDispatcher")))
             .AddMembers(
                 sf
                     .NamespaceDeclaration(sf.IdentifierName(metadata.First().DispatcherSymbol

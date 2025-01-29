@@ -63,7 +63,7 @@ public class DispatcherCodeGenerator : IIncrementalGenerator
                 item != metadata.DispatcherSymbol.ContainingNamespace.ToDisplayString())
             .Distinct()
             .Select(ns => sf.UsingDirective(sf.IdentifierName(ns!)))
-            .Union(new[] { sf.UsingDirective(sf.IdentifierName("DotnetDispatcher.Core")) });
+            .Union(new[] { sf.UsingDirective(sf.IdentifierName("DotnetDispatcher")) });
 
         var cancellationTokenParameter = sf.Parameter(sf.Identifier("cancellationToken"))
             .WithType(sf.IdentifierName("CancellationToken"))

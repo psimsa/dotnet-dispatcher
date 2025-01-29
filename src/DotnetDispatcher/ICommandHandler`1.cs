@@ -1,10 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotnetDispatcher.Core
+namespace DotnetDispatcher;
+
+public interface ICommandHandler<in TCommand> where TCommand : ICommand
 {
-    public interface ICommandHandler<in TCommand> where TCommand : ICommand
-    {
-        Task Execute(TCommand command, CancellationToken cancellationToken);
-    }
+    Task Execute(TCommand command, CancellationToken cancellationToken);
 }
