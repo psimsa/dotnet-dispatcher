@@ -5,13 +5,19 @@
   ],
   "packageRules": [
     {
-        "matchUpdateTypes": [
-            "patch",
-            "pin",
-            "digest",
-            "minor"
-        ],
-        "automerge": false
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest",
+        "minor"
+      ],
+      "automerge": false
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "automerge": true
     }
   ]
 }
