@@ -1,5 +1,3 @@
 ﻿namespace DotnetDispatcher;
 
-public interface IQuery<out TResponse>
-{
-}
+public interface IQuery<out TResponse> { }

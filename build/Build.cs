@@ -7,13 +7,12 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
     "Continuous build",
     GitHubActionsImage.UbuntuLatest,
-    OnPushBranchesIgnore = new[] { "main" },
+    On = new[] { GitHubActionsTrigger.Push },
     InvokedTargets = new[] { nameof(Clean), nameof(Compile), nameof(Test), nameof(Pack) },
     EnableGitHubToken = true
 )]
@@ -23,134 +22,166 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     On = new[] { GitHubActionsTrigger.WorkflowDispatch },
     InvokedTargets = new[] { nameof(Pack), nameof(PublishToGitHubNuget) },
     EnableGitHubToken = true
-    )]
+)]
 [GitHubActions(
     "Build main and publish to nuget",
     GitHubActionsImage.UbuntuLatest,
-    OnPushBranches = new[] { "main" },
+    OnPushTags = new[] { "v*" },
     InvokedTargets = new[]
-        { nameof(Clean), nameof(Compile), nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish) },
+    {
+        nameof(Clean),
+        nameof(Compile),
+        nameof(Pack),
+        nameof(PublishToGitHubNuget),
+        nameof(Publish),
+    },
     ImportSecrets = new[] { nameof(NuGetApiKey) },
     EnableGitHubToken = true
-    )]
+)]
 class Build : NukeBuild
 {
     readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+    readonly Configuration Configuration = IsLocalBuild
+        ? Configuration.Debug
+        : Configuration.Release;
 
-    [LatestNuGetVersion(
-        "DotnetDispatcher",
-        IncludePrerelease = false)]
+    [LatestNuGetVersion("DotnetDispatcher", IncludePrerelease = false)]
     readonly NuGetVersion DotnetDispatcherVersion;
 
-    [Parameter][Secret] readonly string NuGetApiKey;
+    [Parameter]
+    [Secret]
+    readonly string NuGetApiKey;
 
-    [GitRepository] readonly GitRepository Repository;
+    [GitRepository]
+    readonly GitRepository Repository;
 
-    [Solution(GenerateProjects = true)] readonly Solution Solution;
+    [Solution(GenerateProjects = true)]
+    readonly Solution Solution;
     GitHubActions GitHubActions => GitHubActions.Instance;
 
-    Target Clean => _ => _
-        .Before(Restore)
-        .Executes(() =>
-        {
-            ArtifactsDirectory.CreateOrCleanDirectory();
-        });
+    Target Clean =>
+        _ =>
+            _.Before(Restore)
+                .Executes(() =>
+                {
+                    ArtifactsDirectory.CreateOrCleanDirectory();
+                });
 
-    Target Restore => _ => _
-        .Executes(() =>
-        {
-            DotNetRestore(_ => _
-                .SetProjectFile(Solution)
-            );
-        });
-
-    Target Compile => _ => _
-        .DependsOn(Restore)
-        .Executes(() =>
-        {
-            DotNetBuild(_ => _
-                .SetProjectFile(Solution)
-                .SetConfiguration(Configuration)
-            );
-        });
-
-    Target Test => _ => _
-        .DependsOn(Compile)
-        .Executes(() =>
-        {
-            DotNetTest(_ => _
-                .SetProjectFile(Solution)
-                .SetConfiguration(Configuration)
-                .SetNoBuild(true)
-                .SetNoRestore(true)
-                .SetVerbosity(DotNetVerbosity.normal)
-            );
-        });
-
-    Target Pack => _ => _
-        .DependsOn(Test)
-        .DependsOn(Clean)
-        .Produces(ArtifactsDirectory / "*.nupkg")
-        .Executes(() =>
-        {
-            var newMajor = 1;
-            var newMinor = 0;
-            var newPatch = DotnetDispatcherVersion?.Patch ?? 0 + 1;
-
-            if (DotnetDispatcherVersion != null)
+    Target Restore =>
+        _ =>
+            _.Executes(() =>
             {
-                if (newMajor > DotnetDispatcherVersion.Major)
+                DotNetRestore(_ => _.SetProjectFile(Solution));
+            });
+
+    Target Compile =>
+        _ =>
+            _.DependsOn(Restore)
+                .Executes(() =>
                 {
-                    newMinor = 0;
-                    newPatch = 0;
-                }
-                else if (newMinor > DotnetDispatcherVersion.Minor)
+                    DotNetBuild(_ => _.SetProjectFile(Solution).SetConfiguration(Configuration));
+                });
+
+    Target Test =>
+        _ =>
+            _.DependsOn(Compile)
+                .Executes(() =>
                 {
-                    newPatch = 0;
-                }
-            }
+                    DotNetTest(_ =>
+                        _.SetProjectFile(Solution)
+                            .SetConfiguration(Configuration)
+                            .SetNoBuild(true)
+                            .SetNoRestore(true)
+                            .SetVerbosity(DotNetVerbosity.normal)
+                    );
+                });
 
-            var newVersion = new NuGetVersion(newMajor, newMinor, newPatch,
-                Repository.IsOnMainOrMasterBranch() ? null : $"preview{GitHubActions?.RunNumber ?? 0}");
+    Target Pack =>
+        _ =>
+            _.DependsOn(Test)
+                .DependsOn(Clean)
+                .Produces(ArtifactsDirectory / "*.nupkg")
+                .Executes(() =>
+                {
+                    var newMajor = 1;
+                    var newMinor = 0;
+                    var newPatch = DotnetDispatcherVersion?.Patch ?? 0 + 1;
 
-            DotNetPack(_ => _
-                .SetConfiguration(Configuration)
-                .SetOutputDirectory(ArtifactsDirectory)
-                .SetNoBuild(true)
-                .SetNoRestore(true)
-                .SetVersion(newVersion.ToString())
-                .SetVerbosity(DotNetVerbosity.normal)
-                .SetProject(Solution.src.DotnetDispatcher)
-            );
-        });
+                    if (DotnetDispatcherVersion != null)
+                    {
+                        if (newMajor > DotnetDispatcherVersion.Major)
+                        {
+                            newMinor = 0;
+                            newPatch = 0;
+                        }
+                        else if (newMinor > DotnetDispatcherVersion.Minor)
+                        {
+                            newPatch = 0;
+                        }
+                    }
 
-    Target Publish => _ => _
-        .DependsOn(Pack)
-        .Consumes(Pack)
-        .Requires(() => NuGetApiKey)
-        .Executes(() =>
-        {
-            DotNetNuGetPush(_ => _
-                .SetTargetPath(ArtifactsDirectory / "*.nupkg")
-                .SetSource("https://api.nuget.org/v3/index.json")
-                .SetApiKey(NuGetApiKey)
-            );
-        });
+                    var newVersion = new NuGetVersion(
+                        newMajor,
+                        newMinor,
+                        newPatch,
+                        Repository.IsOnMainOrMasterBranch()
+                            ? null
+                            : $"preview{GitHubActions?.RunNumber ?? 0}"
+                    );
 
-    Target PublishToGitHubNuget => _ => _
-        .DependsOn(Pack)
-        .Consumes(Pack)
-        .Executes(() =>
-        {
-            DotNetNuGetPush(_ => _
-                .SetTargetPath(ArtifactsDirectory / "*.nupkg")
-                .SetSource("https://nuget.pkg.github.com/psimsa/index.json")
-                .SetApiKey(GitHubActions.Token)
-            );
-        });
+                    var latestTag = Repository
+                        .Tags.Where(x => x.StartsWith("v"))
+                        .Select(x => x.Substring(1))
+                        .OrderByDescending(x => x)
+                        .FirstOrDefault();
+                    if (latestTag != null)
+                    {
+                        var latestVersion = NuGetVersion.Parse(latestTag);
+                        if (latestVersion > newVersion)
+                        {
+                            newVersion = latestVersion;
+                        }
+                    }
+
+                    DotNetPack(_ =>
+                        _.SetConfiguration(Configuration)
+                            .SetOutputDirectory(ArtifactsDirectory)
+                            .SetNoBuild(true)
+                            .SetNoRestore(true)
+                            .SetVersion(newVersion.ToString())
+                            .SetVerbosity(DotNetVerbosity.normal)
+                            .SetProject(Solution.src.DotnetDispatcher)
+                    );
+                });
+
+    Target Publish =>
+        _ =>
+            _.DependsOn(Pack)
+                .Consumes(Pack)
+                .Requires(() => NuGetApiKey)
+                .Executes(() =>
+                {
+                    DotNetNuGetPush(_ =>
+                        _.SetTargetPath(ArtifactsDirectory / "*.nupkg")
+                            .SetSource("https://api.nuget.org/v3/index.json")
+                            .SetApiKey(NuGetApiKey)
+                    );
+                });
+
+    Target PublishToGitHubNuget =>
+        _ =>
+            _.DependsOn(Pack)
+                .Consumes(Pack)
+                .Executes(() =>
+                {
+                    DotNetNuGetPush(_ =>
+                        _.SetTargetPath(ArtifactsDirectory / "*.nupkg")
+                            .SetSource("https://nuget.pkg.github.com/psimsa/index.json")
+                            .SetApiKey(GitHubActions.Token)
+                    );
+                });
 
     /// Support plugins are available for:
     /// - JetBrains ReSharper        https://nuke.build/resharper

@@ -2,8 +2,13 @@
 
 namespace DotnetDispatcher.Generator;
 
-internal record DispatcherGenerationMetadata(INamedTypeSymbol DispatcherSymbol, INamedTypeSymbol QuerySymbol,
-    INamedTypeSymbol? ResponseSymbol, CqrsType CqrsType, INamedTypeSymbol? QueryHandler = null)
+internal record DispatcherGenerationMetadata(
+    INamedTypeSymbol DispatcherSymbol,
+    INamedTypeSymbol QuerySymbol,
+    INamedTypeSymbol? ResponseSymbol,
+    CqrsType CqrsType,
+    INamedTypeSymbol? QueryHandler = null
+)
 {
     public INamedTypeSymbol QuerySymbol { get; } = QuerySymbol;
     public INamedTypeSymbol? ResponseSymbol { get; } = ResponseSymbol;
@@ -15,5 +20,5 @@ internal record DispatcherGenerationMetadata(INamedTypeSymbol DispatcherSymbol, 
 internal enum CqrsType
 {
     Query,
-    Command
+    Command,
 }

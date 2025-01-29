@@ -16,10 +16,7 @@
 
 name: Continuous_build
 
-on:
-  push:
-    branches-ignore:
-      - main
+on: [push]
 
 jobs:
   ubuntu-latest:

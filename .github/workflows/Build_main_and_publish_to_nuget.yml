@@ -18,8 +18,8 @@ name: Build_main_and_publish_to_nuget
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
   ubuntu-latest:

@@ -13,12 +13,15 @@ internal static class Helpers
         {
             SimpleNameSyntax ins => ins.Identifier.Text,
             QualifiedNameSyntax qns => qns.Right.Identifier.Text,
-            _ => null
+            _ => null,
         };
     }
 
-    internal static bool IsNamedAttribute(SyntaxNode syntaxNode,
-        CancellationToken _, params string[] attributes)
+    internal static bool IsNamedAttribute(
+        SyntaxNode syntaxNode,
+        CancellationToken _,
+        params string[] attributes
+    )
     {
         if (syntaxNode is not AttributeSyntax attribute)
             return false;
